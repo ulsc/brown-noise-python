@@ -13,6 +13,9 @@ buffer_size_in_bytes = sample_rate * bytes_per_sample
 
 
 def generate_brown_noise(alpha, last_sample, buffer_length):
+    if alpha <= 0.0 or alpha >= 1.0:
+        raise ValueError("Alpha must be between 0 and 1, exclusive.")
+
     samples = np.zeros(buffer_length)
 
     for i in range(buffer_length):

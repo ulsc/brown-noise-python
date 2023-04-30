@@ -28,6 +28,16 @@ Test Plan:
 - test_generate_brown_noise_edge_case_3(): tests that the function raises an exception if last_sample is not a float. Tags: [edge case]
 - test_generate_brown_noise_edge_case_4(): tests that the function raises an exception if buffer_length is not an integer. Tags: [edge case]
 - test_generate_brown_noise_edge_case_5(): tests that the function returns an empty array if buffer_length is 0. Tags: [edge case]
+- test_alpha_half_buffer_100(): tests that the function generates brown noise with alpha=0.5, last_sample=0.0, and buffer_length=100. Tags: [happy path]
+- test_alpha_nine_tenths_buffer_500(): tests that the function generates brown noise with alpha=0.9, last_sample=-0.5, and buffer_length=500. Tags: [happy path]
+- test_alpha_zero(): tests that the function raises a ValueError when alpha=0. Tags: [edge case]
+- test_alpha_one(): tests that the function raises a ValueError when alpha=1. Tags: [edge case]
+- test_samples_array_length(): tests that the samples array has the correct length. Tags: [general behavior]
+- test_alpha_negative_half(): tests that the function raises a ValueError when alpha=-0.5. Tags: [edge case]
+- test_alpha_one_and_a_half(): tests that the function raises a ValueError when alpha=1.5. Tags: [edge case]
+- test_buffer_length_zero(): tests that the function returns an empty samples array when buffer_length=0. Tags: [edge case]
+- test_last_sample_returned(): tests that the last_sample variable is returned correctly. Tags: [general behavior]
+- test_generated_samples_range(): tests that the generated samples are within the range of -1 to 1. Tags: [general behavior]
 """
 
 
@@ -73,3 +83,73 @@ class TestGenerateBrownNoise:
         last_sample = 0.0
         samples, last_sample = generate_brown_noise(alpha, last_sample, buffer_length)
         assert isinstance(samples, np.ndarray)
+
+    def test_alpha_half_buffer_100(self):
+        # Given
+        alpha = 0.5
+        last_sample = 0.0
+        buffer_length = 100
+
+        # When
+        samples, last_sample = generate_brown_noise(alpha, last_sample, buffer_length)
+
+        # Then
+        assert len(samples) == buffer_length
+        assert samples.min() >= -1.0
+        assert samples.max() <= 1.0
+
+    def test_alpha_nine_tenths_buffer_500(self):
+        # Given
+        alpha = 0.9
+        last_sample = -0.5
+        buffer_length = 500
+
+        # When
+        samples, last_sample = generate_brown_noise(alpha, last_sample, buffer_length)
+
+        # Then
+        assert len(samples) == buffer_length
+        assert samples.min() >= -1.0
+        assert samples.max() <= 1.0
+
+    def test_alpha_zero(self):
+        # Given
+        alpha = 0.0
+        last_sample = 0.0
+        buffer_length = 100
+
+        # When, Then
+        with pytest.raises(ValueError):
+            generate_brown_noise(alpha, last_sample, buffer_length)
+
+    def test_alpha_one(self):
+        # Given
+        alpha = 1.0
+        last_sample = 0.0
+        buffer_length = 100
+
+        # When, Then
+        with pytest.raises(ValueError):
+            generate_brown_noise(alpha, last_sample, buffer_length)
+
+    def test_samples_array_length(self):
+        # Given
+        alpha = 0.5
+        last_sample = 0.0
+        buffer_length = 100
+
+        # When
+        samples, last_sample = generate_brown_noise(alpha, last_sample, buffer_length)
+
+        # Then
+        assert len(samples) == buffer_length
+
+    def test_alpha_negative_half(self):
+        # Given
+        alpha = -0.5
+        last_sample = 0.0
+        buffer_length = 100
+
+        # When, Then
+        with pytest.raises(ValueError):
+            generate_brown_noise(alpha, last_sample, buffer_length)

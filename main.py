@@ -27,9 +27,23 @@ def generate_brown_noise(alpha, last_sample, buffer_length):
     return samples, last_sample
 
 
-def main():
-    p = pyaudio.PyAudio()
+def create_pyaudio_instance():
+    return pyaudio.PyAudio()
 
+
+def create_audio_stream(p, callback, buffer_size):
+    stream = p.open(
+        format=bit_depth,
+        channels=channels,
+        rate=sample_rate,
+        output=True,
+        stream_callback=callback,
+        frames_per_buffer=int(buffer_size / 2),
+    )
+    return stream
+
+
+def brown_noise_callback(last_sample):
     def callback(in_data, frame_count, time_info, status):
         nonlocal last_sample
         samples, last_sample = generate_brown_noise(0.01, last_sample, frame_count)
@@ -38,16 +52,14 @@ def main():
         data = struct.pack("<" + "h" * len(stereo_samples), *stereo_samples)
         return data, pyaudio.paContinue
 
-    last_sample = 0
-    stream = p.open(
-        format=bit_depth,
-        channels=channels,
-        rate=sample_rate,
-        output=True,
-        stream_callback=callback,
-        frames_per_buffer=int(buffer_size_in_bytes / 2),
-    )
+    return callback
 
+
+def main():
+    p = create_pyaudio_instance()
+    last_sample = 0
+    callback = brown_noise_callback(last_sample)
+    stream = create_audio_stream(p, callback, buffer_size_in_bytes)
     stream.start_stream()
 
     try:
